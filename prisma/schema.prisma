@@ -9,12 +9,12 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  password  String
-  role      Role     @default(SELLER)
-  tickets   Ticket[] // Relación: Un vendedor tiene muchos números vendidos
+  id       String   @id @default(cuid())
+  name     String
+  email    String   @unique
+  password String
+  role     Role     @default(SELLER)
+  tickets  Ticket[] // Las ventas asociadas a este vendedor
 }
 
 enum Role {
@@ -23,13 +23,18 @@ enum Role {
 }
 
 model Ticket {
-  id            String   @id @default(cuid())
-  number        Int      
-  status        Status   @default(AVAILABLE)
-  buyerName     String?
-  buyerPhone    String?
-  seller        User?    @relation(fields: [userId], references: [id])
-  userId        String?
+  id          String    @id @default(cuid())
+  number      Int       @unique // El número de la rifa (único)
+  status      Status    @default(AVAILABLE)
+  
+  // Datos del Comprador (se llenan al vender)
+  buyerName   String?
+  buyerPhone  String?
+  soldAt      DateTime?
+
+  // Relación con el Vendedor (quién lo vendió)
+  seller      User?     @relation(fields: [userId], references: [id])
+  userId      String?
 }
 
 enum Status {
