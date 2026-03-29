@@ -1,26 +1,44 @@
 @import "tailwindcss";
 
+@theme {
+  /* Colores del Club de Rugby */
+  --color-club-primary: #0A0F1E;    /* Azul profundo (fondo) */
+  --color-club-secondary: #1A2035;  /* Azul intermedio (cards) */
+  --color-club-accent: #00E676;     /* Verde vibrante (botones/éxito) */
+  --color-club-white: #FFFFFF;      /* Blanco */
+  
+  /* Efectos de Glassmorphism */
+  --shadow-glass: 0 8px 32px 0 rgba(0, 230, 118, 0.1);
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  background-color: var(--color-club-primary);
+  color: var(--color-club-white);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  font-family: sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Clases de utilidad personalizadas para ese efecto "Portfolio" */
+@utility rugby-card {
+  background-color: var(--color-club-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    border-color: var(--color-club-accent);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-glass);
+  }
+}
+
+@utility ticket-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+  gap: 0.5rem;
 }
