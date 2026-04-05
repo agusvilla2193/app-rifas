@@ -45,7 +45,7 @@ export default function LoginPage() {
                     )}
 
                     <div>
-                        <label className="block text-xs uppercase tracking-widest text-gray-400 mb-2 ml-1">Email del Club</label>
+                        <label className="block text-xs uppercase tracking-widest text-gray-400 mb-2 ml-1">Email del Vendedor</label>
                         <input
                             required
                             type="email"

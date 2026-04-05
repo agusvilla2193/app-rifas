@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Ticket } from "@prisma/client";
 import { sellTicket } from "@/app/lib/actions";
+import { toast } from "sonner";
 
 interface Props {
     initialTickets: Ticket[];
@@ -22,13 +23,19 @@ export default function TicketGrid({ initialTickets }: Props) {
             const result = await sellTicket(formData);
 
             if (result.success && result.whatsappUrl) {
-                // Abrimos WhatsApp en una pestaña nueva
-                window.open(result.whatsappUrl, "_blank");
-                setSelectedTicket(null);
+                toast.success("¡Venta registrada con éxito!");
+
+                // Pequeño delay para que el usuario lea el mensaje de éxito
+                setTimeout(() => {
+                    window.open(result.whatsappUrl, "_blank");
+                    setSelectedTicket(null);
+                }, 1000);
+            } else {
+                toast.error(result.error || "No se pudo procesar la venta.");
             }
         } catch (error) {
             console.error("Error al vender:", error);
-            alert("Hubo un error al procesar la venta.");
+            toast.error("Ocurrió un error inesperado al procesar la venta.");
         } finally {
             setIsPending(false);
         }
@@ -42,7 +49,7 @@ export default function TicketGrid({ initialTickets }: Props) {
                         key={ticket.id}
                         onClick={() => ticket.status === 'AVAILABLE' && setSelectedTicket(ticket)}
                         className={`aspect-square flex items-center justify-center text-[10px] border rounded transition-all 
-              ${ticket.status === 'SOLD'
+                        ${ticket.status === 'SOLD'
                                 ? 'bg-club-accent text-club-primary border-club-accent opacity-50 cursor-not-allowed'
                                 : 'bg-club-primary/50 border-white/5 text-gray-400 hover:border-club-accent hover:text-club-accent cursor-pointer hover:scale-110'
                             }`}
@@ -52,7 +59,7 @@ export default function TicketGrid({ initialTickets }: Props) {
                 ))}
             </div>
 
-            {/* MODAL (Estilo Glassmorphism) */}
+            {/* MODAL */}
             {selectedTicket && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
                     <div className="rugby-card w-full max-w-md border-club-accent/30 shadow-2xl animate-in fade-in zoom-in duration-300">
@@ -61,7 +68,6 @@ export default function TicketGrid({ initialTickets }: Props) {
                         </h3>
 
                         <form className="space-y-4" onSubmit={handleFormSubmit}>
-                            {/* Inputs ocultos para la Server Action */}
                             <input type="hidden" name="ticketId" value={selectedTicket.id} />
                             <input type="hidden" name="number" value={selectedTicket.number} />
 
