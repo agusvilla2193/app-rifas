@@ -2,7 +2,8 @@ import { auth, signOut } from "@/app/lib/auth.config";
 import { redirect } from "next/navigation";
 import { PrismaClient } from "@prisma/client";
 import TicketGrid from "@/components/TicketGrid";
-import StatsCards from "@/components/StatsCards"; // Asegurate de haber creado este archivo
+import StatsCards from "@/components/StatsCards";
+import SalesTable from "@/components/SalesTable";
 
 const prisma = new PrismaClient();
 
@@ -10,13 +11,21 @@ export default async function DashboardPage() {
     const session = await auth();
     if (!session) redirect("/auth");
 
-    // Traemos todos los tickets
+    // Traemos todos los tickets incluyendo la relación con el vendedor (User)
     const tickets = await prisma.ticket.findMany({
         orderBy: { number: "asc" },
+        include: {
+            seller: {
+                select: {
+                    name: true,
+                },
+            },
+        },
     });
 
     // Cálculos para las estadísticas
-    const soldTicketsCount = tickets.filter(t => t.status === "SOLD").length;
+    const soldTickets = tickets.filter(t => t.status === "SOLD");
+    const soldTicketsCount = soldTickets.length;
     const TICKET_PRICE = 5000;
 
     return (
@@ -48,7 +57,7 @@ export default async function DashboardPage() {
             />
 
             {/* GRILLA DE TICKETS */}
-            <div className="rugby-card border-club-accent/10">
+            <div className="rugby-card border-club-accent/10 mb-12">
                 <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-white">
                     <div className="w-2 h-2 bg-club-accent rounded-full animate-pulse"></div>
                     Seleccioná un número para vender
@@ -56,6 +65,9 @@ export default async function DashboardPage() {
 
                 <TicketGrid initialTickets={tickets} />
             </div>
+
+            {/* LISTA DETALLADA DE VENTAS */}
+            <SalesTable soldTickets={soldTickets} />
         </main>
     );
 }
