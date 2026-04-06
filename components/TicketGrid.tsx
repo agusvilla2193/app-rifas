@@ -44,7 +44,7 @@ export default function TicketGrid({ initialTickets }: Props) {
             } else {
                 toast.error(result.error || "No se pudo procesar la venta.");
             }
-        } catch (error) {
+        } catch {
             toast.error("Ocurrió un error inesperado.");
         } finally {
             setIsPending(false);
@@ -67,7 +67,7 @@ export default function TicketGrid({ initialTickets }: Props) {
             } else {
                 toast.error(result.error || "Error al actualizar.");
             }
-        } catch (error) {
+        } catch {
             toast.error("Ocurrió un error inesperado.");
         } finally {
             setIsPending(false);

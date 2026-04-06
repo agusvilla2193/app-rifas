@@ -4,6 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import TicketGrid from "@/components/TicketGrid";
 import StatsCards from "@/components/StatsCards";
 import SalesTable from "@/components/SalesTable";
+import SalesRanking from "@/components/SalesRanking"; // <-- Importamos el nuevo componente
 
 const prisma = new PrismaClient();
 
@@ -11,7 +12,7 @@ export default async function DashboardPage() {
     const session = await auth();
     if (!session) redirect("/auth");
 
-    // Traemos todos los tickets incluyendo la relación con el vendedor (User)
+    // 1. Traemos los tickets con relación al vendedor
     const tickets = await prisma.ticket.findMany({
         orderBy: { number: "asc" },
         include: {
@@ -23,7 +24,25 @@ export default async function DashboardPage() {
         },
     });
 
-    // Cálculos para las estadísticas
+    // 2. Traemos el ranking de vendedores (Agrupado por User)
+    const salesRanking = await prisma.user.findMany({
+        where: {
+            tickets: { some: {} } // Solo usuarios que tengan al menos 1 ticket vendido
+        },
+        select: {
+            name: true,
+            _count: {
+                select: { tickets: true }
+            }
+        },
+        orderBy: {
+            tickets: {
+                _count: 'desc'
+            }
+        },
+        take: 3 // Top 3 para el podio
+    });
+
     const soldTickets = tickets.filter(t => t.status === "SOLD");
     const soldTicketsCount = soldTickets.length;
     const TICKET_PRICE = 5000;
@@ -42,6 +61,7 @@ export default async function DashboardPage() {
                 <form action={async () => {
                     "use server";
                     await signOut();
+                    await redirect("/auth");
                 }}>
                     <button className="px-4 py-2 text-sm border border-red-500/50 text-red-500 rounded-lg hover:bg-red-500/10 transition-all">
                         Cerrar Sesión
@@ -56,11 +76,14 @@ export default async function DashboardPage() {
                 ticketPrice={TICKET_PRICE}
             />
 
+            {/* RANKING (PRIVADO PARA VENDEDORES) */}
+            <SalesRanking ranking={salesRanking} />
+
             {/* GRILLA DE TICKETS */}
             <div className="rugby-card border-club-accent/10 mb-12">
-                <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-white">
+                <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-white italic uppercase">
                     <div className="w-2 h-2 bg-club-accent rounded-full animate-pulse"></div>
-                    Seleccioná un número para vender
+                    Panel de Ventas
                 </h3>
 
                 <TicketGrid initialTickets={tickets} />
